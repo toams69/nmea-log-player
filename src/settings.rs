@@ -1,6 +1,7 @@
 use clap::{crate_version, value_t, App, Arg};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_serial::{Serial, SerialPortSettings};
+use tokio::net::TcpStream;
 
 // Create an empty trait to allow to use an aggregate of traits
 pub trait AsyncReadWrite: AsyncRead + AsyncWrite + Unpin {}
@@ -107,7 +108,16 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
       out_pipe = Box::new(Serial::from_path(&port_name, &settings).unwrap());
     }
     // TODO TCP stream
-    // "tcp" => println!("TCP"),
+    "tcp" => {
+      let host = value_t!(matches, "tcp_host", String).expect("Failed to parse tcp_host");
+      let port = value_t!(matches, "tcp_port", u32).expect("Failed to parse tcp_port"); 
+      let std_stream = std::net::TcpStream::connect(format!(
+        "{}:{}",
+        host, port
+      ))?;
+      let stream = TcpStream::from_std(std_stream)?;
+      out_pipe = Box::new(stream);
+    },
     _ => panic!(format!("out_type not supported")),
   }
 
