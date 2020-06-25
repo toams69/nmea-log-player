@@ -13,3 +13,12 @@ jobs:
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key: "GITHUB OAUTH TOKEN"
+    on:
+      tags: true
+      condition: "$TRAVIS_RUST_VERSION = stable"
+      branch: master
+    file: target/release/nmea-log-player
