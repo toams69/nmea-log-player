@@ -31,7 +31,7 @@ OPTIONS:
 ARGS:
 
     <input_file>    The file to read line by line
-    <out_type>      The type of output (could be tcp or serial)
+    <out_type>      The type of output (could be tcp tcp-client.\ or serial)
 
 
 ### Example
