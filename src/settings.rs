@@ -1,14 +1,17 @@
-use clap::{crate_version, value_t, App, Arg};
+use clap::{crate_version, value_t, App, Arg, ArgMatches};
 use tokio::io::{AsyncRead, AsyncWrite};
-use tokio_serial::{Serial, SerialPortSettings};
 use tokio::net::TcpStream;
+use tokio_serial::{Serial, SerialPortSettings};
 
 // Create an empty trait to allow to use an aggregate of traits
 pub trait AsyncReadWrite: AsyncRead + AsyncWrite + Unpin {}
 impl<T: AsyncRead + AsyncWrite + Unpin> AsyncReadWrite for T {}
 
 pub struct AppConfig {
-  pub out_pipe: Box<dyn AsyncReadWrite>,
+  pub out_pipe: Option<Box<dyn AsyncReadWrite>>,
+  pub out_type: String,
+  pub out_host: String,
+  pub out_port: u32,
   pub input_file: String,
   pub is_verbose: bool,
 }
@@ -83,7 +86,9 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
   // Create help and get args
   let matches = get_base_app_args("nmea-log-player").get_matches();
   let out_type = matches.value_of("out_type").unwrap();
-  let out_pipe: Box<dyn AsyncReadWrite>;
+  let out_pipe: Option<Box<dyn AsyncReadWrite>>;
+  let out_host;
+  let out_port;
 
   match out_type {
     "serial" => {
@@ -105,25 +110,36 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
       let baudrate = value_t!(matches, "baudrate", u32).expect("Failed to parse baudrate");
       let mut settings: SerialPortSettings = Default::default();
       settings.baud_rate = baudrate;
-      out_pipe = Box::new(Serial::from_path(&port_name, &settings).unwrap());
+      out_pipe = Some(Box::new(Serial::from_path(&port_name, &settings).unwrap()));
+      out_host = String::from("");
+      out_port = 0;
     }
     // TODO TCP stream
-    "tcp" => {
+    "tcp-client" => {
       let host = value_t!(matches, "tcp_host", String).expect("Failed to parse tcp_host");
-      let port = value_t!(matches, "tcp_port", u32).expect("Failed to parse tcp_port"); 
-      let std_stream = std::net::TcpStream::connect(format!(
-        "{}:{}",
-        host, port
-      ))?;
+      let port = value_t!(matches, "tcp_port", u32).expect("Failed to parse tcp_port");
+      let std_stream = std::net::TcpStream::connect(format!("{}:{}", host, port))?;
       let stream = TcpStream::from_std(std_stream)?;
-      out_pipe = Box::new(stream);
-    },
+      out_pipe = Some(Box::new(stream));
+      out_host = String::from(&host);
+      out_port = port;
+    }
+    "tcp" => {
+      out_pipe = None;
+      let host = value_t!(matches, "tcp_host", String).expect("Failed to parse tcp_host");
+      let port = value_t!(matches, "tcp_port", u32).expect("Failed to parse tcp_port");
+      out_host = String::from(&host);
+      out_port = port;
+    }
     _ => panic!(format!("out_type not supported")),
   }
 
   let input_file = matches.value_of("input_file").unwrap();
   Ok(AppConfig {
     out_pipe,
+    out_host,
+    out_port,
+    out_type: String::from(out_type),
     input_file: String::from(input_file),
     is_verbose: matches.is_present("verbose"),
   })
