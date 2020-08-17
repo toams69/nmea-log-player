@@ -55,10 +55,10 @@ async fn client_loop(
                             }
                             previous = Some(current);
                         }
-                        let _ = writer.send(nmea_sentence).await;
+                        let _ = writer.send(String::from(nmea_sentence + "\r\n")).await;
                     }
                     Err(_e) => {
-                        let _ = writer.send(nmea_sentence).await;
+                        let _ = writer.send(String::from(nmea_sentence + "\r\n")).await;
                     }
                 }
             }
@@ -89,9 +89,15 @@ async fn process(
                             }
                             previous = Some(current);
                         }
-                        stream.write_all(&nmea_sentence.as_bytes()).await;
+                        stream
+                            .write_all(String::from(nmea_sentence + "\r\n").as_bytes())
+                            .await;
                     }
-                    Err(e) => {}
+                    Err(e) => {
+                        stream
+                            .write_all(String::from(nmea_sentence + "\r\n").as_bytes())
+                            .await;
+                    }
                 }
             }
         }
