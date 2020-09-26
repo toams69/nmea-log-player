@@ -1,6 +1,6 @@
 # nmea-log-player
 
-![Version](https://img.shields.io/badge/version-0.2.0-blue.svg?cacheSeconds=2592000)
+![Version](https://img.shields.io/badge/version-0.3.0-blue.svg?cacheSeconds=2592000)
 ![Build](https://img.shields.io/badge/build-unknow-black.svg?cacheSeconds=2592000)
 
 A simple tool allowing to play GPS logs in serial port or through tcp
