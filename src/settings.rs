@@ -1,4 +1,4 @@
-use clap::{crate_version, value_t, App, Arg, ArgMatches};
+use clap::{crate_version, value_t, App, Arg};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 use tokio_serial::{Serial, SerialPortSettings};
