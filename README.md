@@ -39,5 +39,10 @@ ARGS:
 
 ``nmea-log-player.exe --serial_port COM1 .\gps-logs-samples\logs_gps.nmea serial``
 
+## TODO
+
+- [ ] Allow to specify custom nmea parser (should define how to find the date in sentence and how to parse it).
+- [ ] Allow to specify a speed (this will allow to speed up or down the read of the file).
+
 
 
