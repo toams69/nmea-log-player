@@ -3,10 +3,10 @@
 mod nmea_reader;
 mod settings;
 
-use bus::{Bus};
+use bus::Bus;
 use tokio::net::TcpListener;
 
-use nmea_reader::{ get_nmea_positions, get_stamp_from_nmea_line};
+use nmea_reader::{get_nmea_positions, get_stamp_from_nmea_line};
 use tokio::io::AsyncWriteExt;
 
 use std::error::Error;
@@ -63,8 +63,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match opts.out_pipe {
         Some(mut pipe) => {
+            let is_verbose = opts.is_verbose;
             std::thread::spawn(move || {
-                read_file(bus, &filename, true);
+                read_file(bus, &filename, is_verbose);
             });
             let mut receiver = bus_handle.add_rx();
             loop {
@@ -84,8 +85,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .parse::<SocketAddr>()
                     .unwrap();
                 // Start reader thread
+                let is_verbose = opts.is_verbose;
                 std::thread::spawn(move || {
-                    read_file(bus, &filename, true);
+                    read_file(bus, &filename, is_verbose);
                 });
                 let mut listener = TcpListener::bind(&addr).await?;
                 loop {
