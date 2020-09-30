@@ -24,6 +24,7 @@ FLAGS:
 OPTIONS:
 
     -b, --baudrate <baudrate>          Baudrate to use on the serial port [default: 9600]
+    -r, --rate <rate>                  Replay factor. To increase or decrease replay speed. [default: 1.0]
         --serial_port <serial_port>    The serial port to use to send the lines
         --tcp_host <tcp_host>          The TCP host [default: 127.0.0.1]
         --tcp_port <tcp_port>          The tcp port [default: 8080]
@@ -31,7 +32,7 @@ OPTIONS:
 ARGS:
 
     <input_file>    The file to read line by line
-    <out_type>      The type of output (could be tcp tcp-client or serial)
+    <out_type>      The type of output (could be tcp, tcp-client or serial)
 
 
 ### Example
@@ -42,7 +43,6 @@ ARGS:
 ## TODO
 
 - [ ] Allow to specify custom nmea parser (should define how to find the date in sentence and how to parse it).
-- [ ] Allow to specify a speed (this will allow to speed up or down the read of the file).
-
-
-
+- [x] Allow to specify a speed (this will allow to speed up or down the read of the file).
+- [ ] Allow to pause the replay with the space bar
+- [ ] Add UDP socket support
