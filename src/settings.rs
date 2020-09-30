@@ -13,6 +13,7 @@ pub struct AppConfig {
   pub out_host: String,
   pub out_port: u32,
   pub input_file: String,
+  pub replay_factor: f64,
   pub is_verbose: bool,
 }
 
@@ -28,7 +29,7 @@ pub fn get_base_app_args(app_name: &str) -> App<'_, '_> {
     )
     .arg(
       Arg::with_name("out_type")
-        .help("The type of output (could be tcp or serial)")
+        .help("The type of output (could be tcp, tcp-client or serial)")
         .required(true)
         .index(2),
     )
@@ -62,6 +63,15 @@ pub fn get_base_app_args(app_name: &str) -> App<'_, '_> {
         .default_value("9600"),
     )
     .arg(
+      Arg::with_name("rate")
+        .help("Replay factor. To increase or decrease replay speed.")
+        .takes_value(true)
+        .short("r")
+        .long("rate")
+        .multiple(false)
+        .default_value("1.0"),
+    )
+    .arg(
       Arg::with_name("verbose")
         .help("Print each read line")
         .takes_value(false)
@@ -89,6 +99,7 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
   let out_pipe: Option<Box<dyn AsyncReadWrite>>;
   let out_host;
   let out_port;
+  let replay_factor = value_t!(matches, "rate", f64).unwrap();
 
   match out_type {
     "serial" => {
@@ -114,7 +125,6 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
       out_host = String::from("");
       out_port = 0;
     }
-    // TODO TCP stream
     "tcp-client" => {
       let host = value_t!(matches, "tcp_host", String).expect("Failed to parse tcp_host");
       let port = value_t!(matches, "tcp_port", u32).expect("Failed to parse tcp_port");
@@ -141,6 +151,7 @@ pub async fn get_settings() -> SettingsResult<AppConfig> {
     out_port,
     out_type: String::from(out_type),
     input_file: String::from(input_file),
+    replay_factor,
     is_verbose: matches.is_present("verbose"),
   })
 }
