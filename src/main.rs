@@ -46,6 +46,16 @@ fn read_file(mut bus: Bus<String>, filename: &str, replay_factor: f64, is_verbos
                 }
             }
             previous_stamp = Some(current_stamp);
+        } else {
+            let sleep_time_ms = 1000 as f64 / replay_factor;
+            let sleep_duration = std::time::Duration::from_millis(sleep_time_ms as u64);
+            if is_verbose {
+                println!(
+                    "sleeping for {:?} with a factor of {} = {:?}",
+                    1000, replay_factor, sleep_duration
+                );
+            }
+            std::thread::sleep(sleep_duration);
         }
 
         // Add CR LF at the end of the line
